@@ -28,9 +28,68 @@ h1 {
   background-color: #555;
 }
 
-.mm-popup__box input {
-  display: block;
-  width: 90%;
-  margin: 10px auto;
-  padding: 10px;
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.popup-box {
+  width: 350px;
+  padding: 25px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.popup-box h2 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.popup-box input {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.popup-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.popup-footer button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mm-popup__btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.mm-popup__btn--info {
+  background-color: #2196f3;
+  color: white;
+}
+
+.mm-popup__btn--danger {
+  background-color: #f44336;
+  color: white;
+}
+
+.close-btn {
+  background-color: #777;
+  color: white;
 }

@@ -1,140 +1,118 @@
 import React, { useState } from "react";
 import moment from "moment";
 import { Calendar, momentLocalizer } from "react-big-calendar";
-import Popup from "react-popup";
+
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import "react-popup/style.css";
 import "../styles/App.css";
 
 const localizer = momentLocalizer(moment);
 
 const App = () => {
   const [events, setEvents] = useState([]);
+
   const [filter, setFilter] = useState("all");
 
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
+
+  const [popupMode, setPopupMode] = useState("create");
+
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  const [selectedDate, setSelectedDate] = useState(null);
+
   const [title, setTitle] = useState("");
+
   const [location, setLocation] = useState("");
 
-  const openCreatePopup = ({ start }) => {
-    setSelectedDate(start);
+  // Open popup when an empty date/time slot is selected
+  const handleSelectSlot = ({ start }) => {
+    setPopupMode("create");
     setSelectedEvent(null);
+    setSelectedDate(start);
+
     setTitle("");
     setLocation("");
 
-    Popup.create({
-      title: "Create Event",
-      content: (
-        <div>
-          <input
-            placeholder="Event Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
-          <input
-            placeholder="Event Location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </div>
-      ),
-      buttons: {
-        right: [
-          {
-            text: "Save",
-            className: "mm-popup__btn",
-            action: () => {
-              if (title.trim() === "") {
-                return;
-              }
-
-              const newEvent = {
-                id: Date.now(),
-                title: title,
-                location: location,
-                start: selectedDate,
-                end: moment(selectedDate).add(1, "hour").toDate(),
-              };
-
-              setEvents((previousEvents) => [
-                ...previousEvents,
-                newEvent,
-              ]);
-
-              Popup.close();
-            },
-          },
-        ],
-      },
-    });
+    setShowPopup(true);
   };
 
-  const openEditPopup = (event) => {
+  // Open popup when an existing event is selected
+  const handleSelectEvent = (event) => {
+    setPopupMode("edit");
     setSelectedEvent(event);
+
     setTitle(event.title);
     setLocation(event.location);
 
-    Popup.create({
-      title: "Edit Event",
-      content: (
-        <div>
-          <input
-            placeholder="Event Title"
-            defaultValue={event.title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
-          <input
-            placeholder="Event Location"
-            defaultValue={event.location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </div>
-      ),
-      buttons: {
-        left: [
-          {
-            text: "Delete",
-            className: "mm-popup__btn--danger",
-            action: () => {
-              setEvents((previousEvents) =>
-                previousEvents.filter(
-                  (currentEvent) => currentEvent.id !== event.id
-                )
-              );
-
-              Popup.close();
-            },
-          },
-        ],
-        right: [
-          {
-            text: "Edit",
-            className: "mm-popup__btn--info",
-            action: () => {
-              setEvents((previousEvents) =>
-                previousEvents.map((currentEvent) =>
-                  currentEvent.id === event.id
-                    ? {
-                        ...currentEvent,
-                        title: title,
-                        location: location,
-                      }
-                    : currentEvent
-                )
-              );
-
-              Popup.close();
-            },
-          },
-        ],
-      },
-    });
+    setShowPopup(true);
   };
 
+  // Save a new event
+  const handleCreateEvent = () => {
+    if (title.trim() === "") {
+      return;
+    }
+
+    const newEvent = {
+      id: Date.now(),
+      title: title.trim(),
+      location: location.trim(),
+      start: selectedDate,
+      end: moment(selectedDate).add(1, "hour").toDate(),
+    };
+
+    setEvents((previousEvents) => [
+      ...previousEvents,
+      newEvent,
+    ]);
+
+    closePopup();
+  };
+
+  // Update an existing event
+  const handleEditEvent = () => {
+    if (title.trim() === "") {
+      return;
+    }
+
+    setEvents((previousEvents) =>
+      previousEvents.map((event) => {
+        if (event.id === selectedEvent.id) {
+          return {
+            ...event,
+            title: title.trim(),
+            location: location.trim(),
+          };
+        }
+
+        return event;
+      })
+    );
+
+    closePopup();
+  };
+
+  // Delete an existing event
+  const handleDeleteEvent = () => {
+    setEvents((previousEvents) =>
+      previousEvents.filter(
+        (event) => event.id !== selectedEvent.id
+      )
+    );
+
+    closePopup();
+  };
+
+  // Close popup and reset popup-related state
+  const closePopup = () => {
+    setShowPopup(false);
+    setSelectedEvent(null);
+    setSelectedDate(null);
+    setTitle("");
+    setLocation("");
+  };
+
+  // Filter events according to the selected filter
   const getFilteredEvents = () => {
     const currentTime = new Date();
 
@@ -149,6 +127,7 @@ const App = () => {
     return events;
   };
 
+  // Apply different colors to past and upcoming events
   const eventStyleGetter = (event) => {
     const isPast = event.start < new Date();
 
@@ -158,8 +137,8 @@ const App = () => {
           ? "rgb(222, 105, 135)"
           : "rgb(140, 189, 76)",
         color: "white",
-        borderRadius: "4px",
         border: "none",
+        borderRadius: "4px",
       },
     };
   };
@@ -169,15 +148,24 @@ const App = () => {
       <h1>Event Tracker Calendar</h1>
 
       <div className="filters">
-        <button className="btn" onClick={() => setFilter("all")}>
+        <button
+          className="btn"
+          onClick={() => setFilter("all")}
+        >
           All
         </button>
 
-        <button className="btn" onClick={() => setFilter("past")}>
+        <button
+          className="btn"
+          onClick={() => setFilter("past")}
+        >
           Past
         </button>
 
-        <button className="btn" onClick={() => setFilter("upcoming")}>
+        <button
+          className="btn"
+          onClick={() => setFilter("upcoming")}
+        >
           Upcoming
         </button>
       </div>
@@ -188,13 +176,68 @@ const App = () => {
         startAccessor="start"
         endAccessor="end"
         selectable
-        onSelectSlot={openCreatePopup}
-        onSelectEvent={openEditPopup}
+        onSelectSlot={handleSelectSlot}
+        onSelectEvent={handleSelectEvent}
         eventPropGetter={eventStyleGetter}
         style={{ height: 600 }}
       />
 
-      <Popup />
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <h2>
+              {popupMode === "create"
+                ? "Create Event"
+                : "Edit Event"}
+            </h2>
+
+            <input
+              placeholder="Event Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <input
+              placeholder="Event Location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+
+            <div className="popup-footer">
+              {popupMode === "edit" && (
+                <button
+                  className="mm-popup__btn--danger"
+                  onClick={handleDeleteEvent}
+                >
+                  Delete
+                </button>
+              )}
+
+              <button
+                className="close-btn"
+                onClick={closePopup}
+              >
+                Cancel
+              </button>
+
+              <button
+                className={
+                  popupMode === "edit"
+                    ? "mm-popup__btn--info"
+                    : "mm-popup__btn"
+                }
+                onClick={
+                  popupMode === "create"
+                    ? handleCreateEvent
+                    : handleEditEvent
+                }
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

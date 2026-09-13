@@ -9,7 +9,6 @@ const localizer = momentLocalizer(moment);
 
 const App = () => {
   const [events, setEvents] = useState([]);
-
   const [filter, setFilter] = useState("all");
 
   const [showPopup, setShowPopup] = useState(false);
@@ -21,15 +20,19 @@ const App = () => {
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
 
-  const handleSelectSlot = ({ start }) => {
+  const openCreatePopup = (date = new Date()) => {
     setPopupMode("create");
     setSelectedEvent(null);
-    setSelectedDate(start);
+    setSelectedDate(date);
 
     setTitle("");
     setLocation("");
 
     setShowPopup(true);
+  };
+
+  const handleSelectSlot = ({ start }) => {
+    openCreatePopup(start);
   };
 
   const handleSelectEvent = (event) => {
@@ -51,8 +54,10 @@ const App = () => {
       id: Date.now(),
       title: title.trim(),
       location: location.trim(),
-      start: selectedDate,
-      end: moment(selectedDate).add(1, "hour").toDate(),
+      start: selectedDate || new Date(),
+      end: moment(selectedDate || new Date())
+        .add(1, "hour")
+        .toDate(),
     };
 
     setEvents((previousEvents) => [
@@ -168,6 +173,13 @@ const App = () => {
           onClick={() => setFilter("upcoming")}
         >
           Upcoming
+        </button>
+
+        <button
+          className="btn"
+          onClick={() => openCreatePopup()}
+        >
+          Add Event
         </button>
       </div>
 

@@ -1,1 +1,36 @@
+.app {
+  width: 90%;
+  margin: 30px auto;
+  font-family: Arial, sans-serif;
+}
 
+h1 {
+  text-align: center;
+}
+
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #333;
+  color: white;
+}
+
+.btn:hover {
+  background-color: #555;
+}
+
+.mm-popup__box input {
+  display: block;
+  width: 90%;
+  margin: 10px auto;
+  padding: 10px;
+}

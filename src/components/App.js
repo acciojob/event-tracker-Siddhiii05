@@ -13,18 +13,14 @@ const App = () => {
   const [filter, setFilter] = useState("all");
 
   const [showPopup, setShowPopup] = useState(false);
-
   const [popupMode, setPopupMode] = useState("create");
 
   const [selectedEvent, setSelectedEvent] = useState(null);
-
   const [selectedDate, setSelectedDate] = useState(null);
 
   const [title, setTitle] = useState("");
-
   const [location, setLocation] = useState("");
 
-  // Open popup when an empty date/time slot is selected
   const handleSelectSlot = ({ start }) => {
     setPopupMode("create");
     setSelectedEvent(null);
@@ -36,18 +32,16 @@ const App = () => {
     setShowPopup(true);
   };
 
-  // Open popup when an existing event is selected
   const handleSelectEvent = (event) => {
     setPopupMode("edit");
     setSelectedEvent(event);
 
     setTitle(event.title);
-    setLocation(event.location);
+    setLocation(event.location || "");
 
     setShowPopup(true);
   };
 
-  // Save a new event
   const handleCreateEvent = () => {
     if (title.trim() === "") {
       return;
@@ -69,31 +63,31 @@ const App = () => {
     closePopup();
   };
 
-  // Update an existing event
   const handleEditEvent = () => {
-    if (title.trim() === "") {
+    if (title.trim() === "" || !selectedEvent) {
       return;
     }
 
     setEvents((previousEvents) =>
-      previousEvents.map((event) => {
-        if (event.id === selectedEvent.id) {
-          return {
-            ...event,
-            title: title.trim(),
-            location: location.trim(),
-          };
-        }
-
-        return event;
-      })
+      previousEvents.map((event) =>
+        event.id === selectedEvent.id
+          ? {
+              ...event,
+              title: title.trim(),
+              location: location.trim(),
+            }
+          : event
+      )
     );
 
     closePopup();
   };
 
-  // Delete an existing event
   const handleDeleteEvent = () => {
+    if (!selectedEvent) {
+      return;
+    }
+
     setEvents((previousEvents) =>
       previousEvents.filter(
         (event) => event.id !== selectedEvent.id
@@ -103,39 +97,46 @@ const App = () => {
     closePopup();
   };
 
-  // Close popup and reset popup-related state
   const closePopup = () => {
     setShowPopup(false);
+    setPopupMode("create");
+
     setSelectedEvent(null);
     setSelectedDate(null);
+
     setTitle("");
     setLocation("");
   };
 
-  // Filter events according to the selected filter
   const getFilteredEvents = () => {
     const currentTime = new Date();
 
     if (filter === "past") {
-      return events.filter((event) => event.start < currentTime);
+      return events.filter(
+        (event) => event.start < currentTime
+      );
     }
 
     if (filter === "upcoming") {
-      return events.filter((event) => event.start >= currentTime);
+      return events.filter(
+        (event) => event.start >= currentTime
+      );
     }
 
     return events;
   };
 
-  // Apply different colors to past and upcoming events
   const eventStyleGetter = (event) => {
-    const isPast = event.start < new Date();
+    const currentTime = new Date();
+
+    const backgroundColor =
+      event.start < currentTime
+        ? "rgb(222, 105, 135)"
+        : "rgb(140, 189, 76)";
 
     return {
       style: {
-        backgroundColor: isPast
-          ? "rgb(222, 105, 135)"
-          : "rgb(140, 189, 76)",
+        backgroundColor,
         color: "white",
         border: "none",
         borderRadius: "4px",
@@ -192,48 +193,58 @@ const App = () => {
             </h2>
 
             <input
+              type="text"
               placeholder="Event Title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(event) =>
+                setTitle(event.target.value)
+              }
             />
 
             <input
+              type="text"
               placeholder="Event Location"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(event) =>
+                setLocation(event.target.value)
+              }
             />
 
-            <div className="popup-footer">
-              {popupMode === "edit" && (
+            <div className="mm-popup__box__footer">
+              <div className="mm-popup__box__footer__left-space">
+                {popupMode === "edit" && (
+                  <button
+                    className="mm-popup__btn--danger"
+                    onClick={handleDeleteEvent}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+
+              <div className="mm-popup__box__footer__right-space">
                 <button
-                  className="mm-popup__btn--danger"
-                  onClick={handleDeleteEvent}
+                  className="close-btn"
+                  onClick={closePopup}
                 >
-                  Delete
+                  Cancel
                 </button>
-              )}
 
-              <button
-                className="close-btn"
-                onClick={closePopup}
-              >
-                Cancel
-              </button>
-
-              <button
-                className={
-                  popupMode === "edit"
-                    ? "mm-popup__btn--info"
-                    : "mm-popup__btn"
-                }
-                onClick={
-                  popupMode === "create"
-                    ? handleCreateEvent
-                    : handleEditEvent
-                }
-              >
-                Save
-              </button>
+                <button
+                  className={
+                    popupMode === "edit"
+                      ? "mm-popup__btn--info"
+                      : "mm-popup__btn"
+                  }
+                  onClick={
+                    popupMode === "create"
+                      ? handleCreateEvent
+                      : handleEditEvent
+                  }
+                >
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         </div>

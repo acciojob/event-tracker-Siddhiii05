@@ -60,14 +60,25 @@ h1 {
   border-radius: 4px;
 }
 
-.popup-footer {
+.mm-popup__box__footer {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 20px;
 }
 
-.popup-footer button {
+.mm-popup__box__footer__left-space {
+  display: flex;
+  align-items: center;
+}
+
+.mm-popup__box__footer__right-space {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mm-popup__box__footer button {
   padding: 10px 15px;
   border: none;
   border-radius: 4px;
